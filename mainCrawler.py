@@ -1,6 +1,39 @@
-# Import necessary libraries
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime
+import sqlite3
+
+# Set up SQLite database
+def setup_database():
+    """Create an SQLite database to store usage data if it does not exist."""
+    conn = sqlite3.connect('usage_data.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS usage (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT,
+            filter_type TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+# Log usage data to the database and text file
+def log_request(filter_type):
+    """Log the request in the database and a text file."""
+    conn = sqlite3.connect('usage_data.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO usage (timestamp, filter_type) 
+        VALUES (?, ?)
+    ''', (datetime.now().isoformat(), filter_type))
+    conn.commit()
+    conn.close()
+    
+    with open('usage_log.txt', 'a') as log_file:
+        log_file.write(f"{datetime.now().isoformat()} - Filter: {filter_type}\n")
+    
+    print(f"Logged request: {datetime.now().isoformat()} - Filter: {filter_type}")
 
 # Fetch news from Hacker News
 def fetch_news():
@@ -38,7 +71,6 @@ def fetch_news():
     print(f"Total stories fetched: {len(news)}")
     return news
 
-
 # Filter news by number of comments
 def filter_by_comments(news):
     """Filter news with more than 5 words in the title and sort by number of comments."""
@@ -52,3 +84,29 @@ def filter_by_points(news):
     filtered = sorted([entry for entry in news if len(entry['title'].split()) <= 5], key=lambda x: x['points'], reverse=True)
     print(f"Filtered by points: {len(filtered)} entries")
     return filtered
+
+if __name__ == "__main__":
+    # Set up the database
+    setup_database()
+    
+    # Fetch news
+    news = fetch_news()
+    if not news:
+        print("No news fetched.")
+    
+    # Filter news by comments and log the request
+    comments_filtered = filter_by_comments(news)
+    log_request('comments')
+    
+    # Filter news by points and log the request
+    points_filtered = filter_by_points(news)
+    log_request('points')
+    
+    # Print filtered results
+    print("Filtered by comments:")
+    for entry in comments_filtered:
+        print(entry)
+    
+    print("\nFiltered by points:")
+    for entry in points_filtered:
+        print(entry)
