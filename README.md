@@ -23,6 +23,10 @@ This project is a web crawler that extracts the first 30 entries from [Hacker Ne
 - `beautifulsoup4`
 - `sqlite3` (part of the Python standard library)
 
+## Database Visualization (DBeaver)
+
+<img src=./assets/dbtest.png>
+ 
 ## Setup Instructions
 
 ### 1. Clone the Repository
