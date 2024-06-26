@@ -37,3 +37,18 @@ def fetch_news():
 
     print(f"Total stories fetched: {len(news)}")
     return news
+
+
+# Filter news by number of comments
+def filter_by_comments(news):
+    """Filter news with more than 5 words in the title and sort by number of comments."""
+    filtered = sorted([entry for entry in news if len(entry['title'].split()) > 5], key=lambda x: x['comments'], reverse=True)
+    print(f"Filtered by comments: {len(filtered)} entries")
+    return filtered
+
+# Filter news by number of points
+def filter_by_points(news):
+    """Filter news with 5 or fewer words in the title and sort by number of points."""
+    filtered = sorted([entry for entry in news if len(entry['title'].split()) <= 5], key=lambda x: x['points'], reverse=True)
+    print(f"Filtered by points: {len(filtered)} entries")
+    return filtered
